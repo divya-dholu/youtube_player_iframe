@@ -59,7 +59,7 @@ class YoutubePlayerController implements YoutubePlayerIFrameAPI {
       ..setNavigationDelegate(navigationDelegate)
       ..setUserAgent(params.userAgent)
       ..addJavaScriptChannel(playerId, onMessageReceived: _eventHandler.call)
-      ..enableZoom(false);
+      ..enableZoom(true);
 
     final webViewPlatform = webViewController.platform;
     if (webViewPlatform is AndroidWebViewController) {
@@ -226,6 +226,7 @@ class YoutubePlayerController implements YoutubePlayerIFrameAPI {
   /// The [url] must be a valid youtube video watch url.
   /// i.e. https://www.youtube.com/watch?v=VIDEO_ID
   Future<void> loadVideo(String url) {
+    print('URL FROM PACKAGE : $url');
     assert(
       RegExp(r'^https://(?:www\.|m\.)?youtube\.com/watch.*').hasMatch(url),
       'Only YouTube watch URLs are supported.',
