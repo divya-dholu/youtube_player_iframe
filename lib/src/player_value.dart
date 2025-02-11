@@ -12,7 +12,7 @@ class YoutubePlayerValue {
   /// of a [YoutubePlayerController].
   YoutubePlayerValue({
     this.fullScreenOption = const FullScreenOption(enabled: false),
-    this.playerState = PlayerState.unknown,
+    this.playerState = PlayerState.playing,
     this.playbackRate = PlaybackRate.normal,
     this.playbackQuality,
     this.error = YoutubeError.none,

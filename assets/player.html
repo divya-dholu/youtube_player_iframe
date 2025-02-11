@@ -1,335 +1,9 @@
-<!--<!DOCTYPE html>-->
-<!--<html lang="en">-->
-<!--<head>-->
-<!--  <meta-->
-<!--          name="viewport"-->
-<!--          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"-->
-<!--  />-->
-<!--  <style>-->
-<!--    html {-->
-<!--      width: 100%;-->
-<!--      height: 100%;-->
-<!--      background-color: black;-->
-<!--      pointer-events: <<pointerEvents>>;-->
-<!--    }-->
-
-<!--    body {-->
-<!--      margin: 0;-->
-<!--      width: 100%;-->
-<!--      height: 100%;-->
-<!--      background-color: black;-->
-<!--      pointer-events: none;-->
-<!--    }-->
-
-<!--    .embed-container iframe,-->
-<!--    .embed-container object,-->
-<!--    .embed-container embed {-->
-<!--      position: absolute;-->
-<!--      top: 0;-->
-<!--      left: 0;-->
-<!--      width: 100% !important;-->
-<!--      height: 100% !important;-->
-<!--      pointer-events: inherit;-->
-<!--    }-->
-
-<!--    /* Hide YouTube elements before they load */-->
-<!--    iframe {-->
-<!--      background-color: black !important;-->
-<!--    }-->
-
-<!--    /* This style will be injected into the iframe as soon as it loads */-->
-<!--    #css-injection-script {-->
-<!--      display: none;-->
-<!--    }-->
-<!--  </style>-->
-<!--  <title>Youtube Player</title>-->
-<!--</head>-->
-
-<!--<body>-->
-<!--<div class="embed-container">-->
-<!--  <div id="<<playerId>>"></div>-->
-<!--</div>-->
-
-<!--&lt;!&ndash; Style element that will be injected into iframe &ndash;&gt;-->
-<!--<div id="css-injection-script">-->
-<!--  <style>-->
-<!--    .ytp-chrome-top,-->
-<!--    .ytp-chrome-bottom,-->
-<!--    .ytp-watermark,-->
-<!--    .ytp-title,-->
-<!--    .ytp-menu-button-wrapper,-->
-<!--    .ytp-cards-button,-->
-<!--    .ytp-cards-teaser,-->
-<!--    .ytp-ce-element,-->
-<!--    .ytp-pause-overlay,-->
-<!--    .ytp-gradient-top,-->
-<!--    .ytp-gradient-bottom,-->
-<!--    .ytp-show-cards-title,-->
-<!--    .ytp-youtube-button,-->
-<!--    .ytp-button[aria-label*='More actions'],-->
-<!--    [class*='ytp-button']:not(.ytp-play-button):not(.ytp-mute-button):not(.ytp-fullscreen-button) {-->
-<!--      display: none !important;-->
-<!--      opacity: 0 !important;-->
-<!--      visibility: hidden !important;-->
-<!--    }-->
-<!--  </style>-->
-<!--</div>-->
-
-<!--<script>-->
-<!--  // Function to inject CSS into iframe-->
-<!--  function injectCSS(iframe) {-->
-<!--    try {-->
-<!--      if (!iframe.contentWindow || !iframe.contentWindow.document.head) return;-->
-
-<!--      const style = document.getElementById('css-injection-script').innerHTML;-->
-<!--      const styleElement = document.createElement('style');-->
-<!--      styleElement.innerHTML = style;-->
-<!--      iframe.contentWindow.document.head.appendChild(styleElement);-->
-<!--    } catch (e) {-->
-<!--      console.log('Error injecting CSS:', e);-->
-<!--    }-->
-<!--  }-->
-
-<!--  // Monitor for iframe creation and inject CSS-->
-<!--  const observer = new MutationObserver((mutations) => {-->
-<!--    mutations.forEach((mutation) => {-->
-<!--      mutation.addedNodes.forEach((node) => {-->
-<!--        if (node.nodeName === 'IFRAME') {-->
-<!--          // Inject immediately-->
-<!--          injectCSS(node);-->
-
-<!--          // Also inject after a short delay to ensure it works-->
-<!--          setTimeout(() => injectCSS(node), 0);-->
-<!--          setTimeout(() => injectCSS(node), 0);-->
-<!--          setTimeout(() => injectCSS(node), 0);-->
-<!--        }-->
-<!--      });-->
-<!--    });-->
-<!--  });-->
-
-<!--  // Start observing-->
-<!--  observer.observe(document.body, {-->
-<!--    childList: true,-->
-<!--    subtree: true-->
-<!--  });-->
-
-<!--  var tag = document.createElement("script");-->
-<!--  tag.src = "https://www.youtube.com/iframe_api";-->
-<!--  var firstScriptTag = document.getElementsByTagName("script")[0];-->
-<!--  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);-->
-
-<!--  var platform = "<<platform>>";-->
-<!--  var host = "<<host>>";-->
-<!--  var player;-->
-<!--  var timerId;-->
-<!--  var hideElementsInterval;-->
-
-<!--  function onYouTubeIframeAPIReady() {-->
-<!--    player = new YT.Player("<<playerId>>", {-->
-<!--      host: host,-->
-<!--      playerVars: {-->
-<!--        modestbranding: 1,-->
-<!--        rel: 0,-->
-<!--        showinfo: 0,-->
-<!--        controls: 0,-->
-<!--        fs: 1,-->
-<!--      },-->
-<!--      events: {-->
-<!--        onReady: function (event) {-->
-<!--          handleFullScreenForMobilePlatform();-->
-<!--          sendMessage('Ready', event);-->
-
-<!--          // Hide elements-->
-<!--          hideYouTubeElements();-->
-
-<!--          // Set up an interval to keep elements hidden-->
-<!--          hideElementsInterval = setInterval(hideYouTubeElements, 0);-->
-<!--        },-->
-<!--        onStateChange: function (event) {-->
-<!--          clearTimeout(timerId);-->
-<!--          sendMessage('StateChange', event.data);-->
-<!--          if (event.data == 1) {-->
-<!--          hideYouTubeElements();-->
-<!--            timerId = setInterval(function () {-->
-<!--              var state = {-->
-<!--                currentTime: player.getCurrentTime(),-->
-<!--                loadedFraction: player.getVideoLoadedFraction(),-->
-<!--              };-->
-
-<!--              sendMessage('VideoState', JSON.stringify(state));-->
-<!--            }, 0);-->
-
-<!--          } else if (event.data == 2) {-->
-<!--             hideYouTubeElements();-->
-<!--          }-->
-<!--        },-->
-<!--        onPlaybackQualityChange: function (event) {-->
-<!--          sendMessage('PlaybackQualityChange', event.data);-->
-<!--        },-->
-<!--        onPlaybackRateChange: function (event) {-->
-<!--          sendMessage('PlaybackRateChange', event.data);-->
-<!--        },-->
-<!--        onApiChange: function (event) {-->
-<!--          sendMessage('ApiChange', event.data);-->
-<!--        },-->
-<!--        onError: function (event) {-->
-<!--          sendMessage('PlayerError', event.data);-->
-<!--        },-->
-<!--        onAutoplayBlocked: function (event) {-->
-<!--          sendMessage('AutoplayBlocked', event.data);-->
-<!--        },-->
-<!--      },-->
-<!--    });-->
-<!--    player.setSize(window.innerWidth, window.innerHeight);-->
-<!--  }-->
-
-<!--  window.addEventListener(-->
-<!--    "message",-->
-<!--    (event) => {-->
-<!--      try {-->
-<!--        var data = JSON.parse(event.data);-->
-
-<!--        if (data.function) {-->
-<!--          var rawFunction = data.function.replaceAll("<<quote>>", '"');-->
-<!--          var result = eval(rawFunction);-->
-
-<!--          if (data.key) {-->
-<!--            var message = {};-->
-<!--            message[data.key] = result;-->
-<!--            var messageString = JSON.stringify(message);-->
-
-<!--            event.source.postMessage(messageString, "*");-->
-<!--          }-->
-<!--        }-->
-<!--      } catch (e) {}-->
-<!--    },-->
-<!--    false-->
-<!--  );-->
-
-<!--  window.onresize = function () {-->
-<!--    player.setSize(window.innerWidth, window.innerHeight);-->
-<!--  };-->
-
-<!--  function sendPlatformMessage(message) {-->
-<!--    switch (platform) {-->
-<!--      case "android":-->
-<!--        <<playerId>>.postMessage(message);-->
-<!--        break;-->
-<!--      case "ios":-->
-<!--        <<playerId>>.postMessage(message, "*");-->
-<!--        break;-->
-<!--      case "web":-->
-<!--        window.parent.postMessage(message, "*");-->
-<!--        break;-->
-<!--    }-->
-<!--  }-->
-
-<!--  function sendMessage(key, data) {-->
-<!--    var message = {};-->
-<!--    message[key] = data;-->
-<!--    message["playerId"] = "<<playerId>>";-->
-<!--    var messageString = JSON.stringify(message);-->
-
-<!--    sendPlatformMessage(messageString);-->
-<!--  }-->
-
-<!--  function getVideoData() {-->
-<!--    return prepareDataForPlatform(player.getVideoData());-->
-<!--  }-->
-
-<!--  function getPlaylist() {-->
-<!--    return prepareDataForPlatform(player.getPlaylist());-->
-<!--  }-->
-
-<!--  function getAvailablePlaybackRates() {-->
-<!--    return prepareDataForPlatform(player.getAvailablePlaybackRates());-->
-<!--  }-->
-
-<!--  function prepareDataForPlatform(data) {-->
-<!--    if (platform == "android") return data;-->
-
-<!--    return JSON.stringify(data);-->
-<!--  }-->
-
-<!--  function handleFullScreenForMobilePlatform() {-->
-<!--    if (platform != "web") {-->
-<!--      var ytFrame =-->
-<!--        document.getElementsByTagName("iframe")[0].contentWindow.document;-->
-<!--      var fsButton = ytFrame.getElementsByClassName(-->
-<!--        "ytp-fullscreen-button ytp-button"-->
-<!--      )[0];-->
-
-<!--      if (fsButton != null) {-->
-<!--        var fsButtonCopy = fsButton.cloneNode(true);-->
-<!--        fsButton.replaceWith(fsButtonCopy);-->
-<!--        fsButtonCopy.onclick = function () {-->
-<!--          sendMessage("FullscreenButtonPressed", "");-->
-<!--        };-->
-<!--      }-->
-<!--    }-->
-<!--  }-->
-
-<!--  function hideYouTubeElements() {-->
-<!--    try {-->
-<!--      var iframe = document.getElementsByTagName('iframe')[0];-->
-<!--      if (iframe) {-->
-<!--        // Re-inject the CSS-->
-<!--        injectCSS(iframe);-->
-
-<!--        if (iframe.contentWindow) {-->
-<!--          const elementsToHide = [-->
-<!--            ".ytp-watermark",           // YouTube logo-->
-<!--            ".ytp-title",               // Video title-->
-<!--            ".ytp-menu-button-wrapper", // Three dots menu-->
-<!--            ".ytp-button[aria-label*='More actions']", // Alternative menu button-->
-<!--            ".ytp-cards-button",        // Info button-->
-<!--            ".ytp-cards-teaser",        // Info cards-->
-<!--            ".ytp-ce-element",          // End screen elements-->
-<!--            ".ytp-pause-overlay",       // Pause overlay suggestions-->
-<!--            ".ytp-chrome-top",          // Top chrome-->
-<!--            ".ytp-gradient-top",        // Top gradient-->
-<!--            ".ytp-gradient-bottom",     // Bottom gradient-->
-<!--            ".ytp-chrome-bottom",       // Bottom chrome-->
-<!--            ".ytp-show-cards-title"     // Cards title-->
-<!--          ];-->
-
-<!--          elementsToHide.forEach(selector => {-->
-<!--            const element = iframe.contentWindow.document.querySelector(selector);-->
-<!--            if (element) {-->
-<!--              element.style.display = "none";-->
-<!--              element.style.opacity = "0";-->
-<!--              element.style.visibility = "hidden";-->
-<!--            }-->
-<!--          });-->
-<!--        }-->
-<!--      }-->
-<!--    } catch (e) {-->
-<!--      console.log("Error hiding YouTube elements:", e);-->
-<!--    }-->
-<!--  }-->
-<!--</script>-->
-<!--</body>-->
-<!--</html>-->
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <style>
-    html {
-      width: 100%;
-      height: 100%;
-      background-color: black;
-      pointer-events: <<pointerEvents>>;
-    }
-
-    body {
+    html, body {
       margin: 0;
       width: 100%;
       height: 100%;
@@ -337,36 +11,46 @@
       pointer-events: none;
     }
 
-    .embed-container iframe,
-    .embed-container object,
-    .embed-container embed {
+    .embed-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background-color: black; /* Default background */
+    }
+
+    .embed-container iframe {
       position: absolute;
       top: 0;
       left: 0;
-      width: 100% !important;
-      height: 100% !important;
-      pointer-events: inherit;
-    }
-
-    iframe {
-      background-color: black !important;
+      width: 100%;
+      height: 100%;
+      pointer-events: auto;
     }
 
     #css-injection-script {
       display: none;
     }
   </style>
-  <title>Youtube Player</title>
+  <title>YouTube Player</title>
 </head>
 
 <body>
-<div class="embed-container">
-  <div id="<<playerId>>"></div>
+<div class="embed-container" id="videoContainer">
+  <div id="player"></div>
 </div>
 
+<!-- CSS Injection Script to Hide YouTube UI -->
 <div id="css-injection-script">
   <style>
-    /* Allow video container and video to display */
+    /* Hide YouTube thumbnail, spinner, and overlays */
+    .ytp-cued-thumbnail-overlay,
+    .ytp-spinner,
+    .ytp-large-play-button {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+    }
+
     .html5-video-container,
     .html5-main-video {
       display: block !important;
@@ -374,122 +58,20 @@
       visibility: visible !important;
       pointer-events: auto !important;
     }
-
-    /* Hide unwanted elements */
-    .ytp-chrome-top,
-    .ytp-chrome-bottom,
-    .ytp-watermark,
-    .ytp-title,
-    .ytp-menu-button-wrapper,
-    .ytp-cards-button,
-    .ytp-cards-teaser,
-    .ytp-ce-element,
-    .ytp-pause-overlay,
-    .ytp-gradient-top,
-    .ytp-gradient-bottom,
-    .ytp-show-cards-title,
-    .ytp-youtube-button,
-    .ytp-button[aria-label*='More actions'],
-    .ytp-spinner,
-    .ytp-spinner-container,
-    .ytp-spinner-rotator,
-    .ytp-spinner-left,
-    .ytp-spinner-right,
-    .ytp-large-play-button,
-    .ytp-bezel,
-    .ytp-bezel-text,
-    .ytp-bezel-text-wrapper,
-    .ytp-ce-video,
-    .ytp-ce-playlist,
-    .ytp-ce-channel,
-    .ytp-ce-website,
-    .ytp-ce-merchandise,
-    .ytp-ce-expanding-overlay,
-    .ytp-ce-element-shadow,
-    .ytp-cards-teaser,
-    .ytp-cards-button,
-    .ytp-cards-toggle-button,
-    .ytp-iv-player-content,
-    .ytp-iv-video-content,
-    .iv-branding,
-    .iv-click-target,
-    .annotation,
-    .video-annotations,
-    .ytp-iv-promo,
-    .ytp-endscreen-content,
-    .ytp-endscreen-previous,
-    .ytp-endscreen-next,
-    .ytp-suggestions,
-    .ytp-suggestions-container,
-    .ytp-pause-overlay,
-    .ytp-pause-overlay-container,
-    .ytp-playlist-menu,
-    .ytp-playlist-container,
-    .ytp-related-videos-container,
-    .ytp-related-videos,
-    .ytp-watch-next,
-    .ytp-upnext,
-    .ytp-endscreen,
-    .html5-endscreen,
-    #endscreen,
-    .ytp-player-content:not(.html5-video-container),
-    .ytp-overlay,
-    .ytp-tooltip {
-      display: none !important;
-      opacity: 0 !important;
-      visibility: hidden !important;
-      pointer-events: none !important;
-    }
-
-    .html5-video-player {
-      background-color: black !important;
-    }
   </style>
 </div>
 
 <script>
-  function injectCSS(iframe) {
-    try {
-      if (!iframe.contentWindow || !iframe.contentWindow.document.head) return;
-      const style = document.getElementById('css-injection-script').innerHTML;
-      const styleElement = document.createElement('style');
-      styleElement.innerHTML = style;
-      iframe.contentWindow.document.head.appendChild(styleElement);
-    } catch (e) {
-      console.log('Error injecting CSS:', e);
-    }
-  }
-
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      mutation.addedNodes.forEach((node) => {
-        if (node.nodeName === 'IFRAME') {
-          injectCSS(node);
-          setTimeout(() => injectCSS(node), 100);
-        }
-      });
-    });
-  });
-
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-
   var tag = document.createElement("script");
   tag.src = "https://www.youtube.com/iframe_api";
   var firstScriptTag = document.getElementsByTagName("script")[0];
   firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-  var platform = "<<platform>>";
-  var host = "<<host>>";
   var player;
-  var timerId;
-  var hideElementsInterval;
 
   function onYouTubeIframeAPIReady() {
-    player = new YT.Player("<<playerId>>", {
-      host: host,
+    player = new YT.Player("player", {
+      videoId: "<<YOUR_VIDEO_ID>>", // Replace with your YouTube video ID
       playerVars: {
         modestbranding: 1,
         rel: 0,
@@ -498,136 +80,38 @@
         fs: 1,
       },
       events: {
-        onReady: function (event) {
-          handleFullScreenForMobilePlatform();
-          sendMessage('Ready', event);
+        onReady: function () {
           hideYouTubeElements();
-          hideElementsInterval = setInterval(hideYouTubeElements, 250);
+          setInterval(hideYouTubeElements, 250);
         },
         onStateChange: function (event) {
-          clearTimeout(timerId);
-          sendMessage('StateChange', event.data);
-          if (event.data == 1) {
-            hideYouTubeElements();
-            timerId = setInterval(function () {
-              var state = {
-                currentTime: player.getCurrentTime(),
-                loadedFraction: player.getVideoLoadedFraction(),
-              };
-              sendMessage('VideoState', JSON.stringify(state));
-            }, 250);
-          } else if (event.data == 0) {
-            hideYouTubeElements();
-          } else if (event.data == 2) {
-            hideYouTubeElements();
-          }
-        },
-        onPlaybackQualityChange: function (event) {
-          sendMessage('PlaybackQualityChange', event.data);
-        },
-        onPlaybackRateChange: function (event) {
-          sendMessage('PlaybackRateChange', event.data);
-        },
-        onApiChange: function (event) {
-          sendMessage('ApiChange', event.data);
-        },
-        onError: function (event) {
-          sendMessage('PlayerError', event.data);
-        },
-        onAutoplayBlocked: function (event) {
-          sendMessage('AutoplayBlocked', event.data);
-        },
-      },
-    });
-    player.setSize(window.innerWidth, window.innerHeight);
-  }
-
-  window.addEventListener(
-    "message",
-    (event) => {
-      try {
-        var data = JSON.parse(event.data);
-        if (data.function) {
-          var rawFunction = data.function.replaceAll("<<quote>>", '"');
-          var result = eval(rawFunction);
-          if (data.key) {
-            var message = {};
-            message[data.key] = result;
-            var messageString = JSON.stringify(message);
-            event.source.postMessage(messageString, "*");
-          }
+          handleStateChange(event.data);
         }
-      } catch (e) {}
-    },
-    false
-  );
-
-  window.onresize = function () {
-    player.setSize(window.innerWidth, window.innerHeight);
-  };
-
-  function sendPlatformMessage(message) {
-    switch (platform) {
-      case "android":
-        <<playerId>>.postMessage(message);
-        break;
-      case "ios":
-        <<playerId>>.postMessage(message, "*");
-        break;
-      case "web":
-        window.parent.postMessage(message, "*");
-        break;
-    }
-  }
-
-  function sendMessage(key, data) {
-    var message = {};
-    message[key] = data;
-    message["playerId"] = "<<playerId>>";
-    var messageString = JSON.stringify(message);
-    sendPlatformMessage(messageString);
-  }
-
-  function getVideoData() {
-    return prepareDataForPlatform(player.getVideoData());
-  }
-
-  function getPlaylist() {
-    return prepareDataForPlatform(player.getPlaylist());
-  }
-
-  function getAvailablePlaybackRates() {
-    return prepareDataForPlatform(player.getAvailablePlaybackRates());
-  }
-
-  function prepareDataForPlatform(data) {
-    if (platform == "android") return data;
-    return JSON.stringify(data);
-  }
-
-  function handleFullScreenForMobilePlatform() {
-    if (platform != "web") {
-      var ytFrame =
-        document.getElementsByTagName("iframe")[0].contentWindow.document;
-      var fsButton = ytFrame.getElementsByClassName(
-        "ytp-fullscreen-button ytp-button"
-      )[0];
-
-      if (fsButton != null) {
-        var fsButtonCopy = fsButton.cloneNode(true);
-        fsButton.replaceWith(fsButtonCopy);
-        fsButtonCopy.onclick = function () {
-          sendMessage("FullscreenButtonPressed", "");
-        };
       }
+    });
+  }
+
+  function handleStateChange(state) {
+    var videoContainer = document.getElementById("videoContainer");
+
+    if (state === -1 || state === 3 || state === undefined) {
+      // -1: UnStarted, 3: Buffering, undefined: Unknown
+      videoContainer.style.backgroundColor = "black";
+    } else if (state === 1) {
+      // 1: Playing
+      videoContainer.style.backgroundColor = "transparent";
+      hideYouTubeElements();
     }
   }
 
   function hideYouTubeElements() {
     try {
-      var iframe = document.getElementsByTagName('iframe')[0];
+      var iframe = document.getElementsByTagName("iframe")[0];
       if (iframe && iframe.contentWindow) {
-        injectCSS(iframe);
+        var style = document.getElementById("css-injection-script").innerHTML;
+        var styleElement = document.createElement("style");
+        styleElement.innerHTML = style;
+        iframe.contentWindow.document.head.appendChild(styleElement);
       }
     } catch (e) {
       console.log("Error hiding YouTube elements:", e);

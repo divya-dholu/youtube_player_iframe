@@ -23,7 +23,7 @@ class YoutubePlayer extends StatefulWidget {
     required this.controller,
     this.aspectRatio = 16 / 9,
     this.gestureRecognizers = const <Factory<OneSequenceGestureRecognizer>>{},
-    this.backgroundColor,
+    this.backgroundColor = Colors.black,
     @Deprecated('Unused parameter. Use `YoutubePlayerParam.userAgent` instead.')
     this.userAgent,
     this.enableFullScreenOnVerticalDrag = true,
