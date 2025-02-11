@@ -668,13 +668,13 @@
       events: {
         onReady: function () {
           hideYouTubeElements();
-          setInterval(hideYouTubeElements, 250);
+          setInterval(hideYouTubeElements, 100);
         },
         onStateChange: function (event) {
           handleStateChange(event.data);
         }
         onError: function (event) {
-          handleError(event.data);
+          hideYouTubeElements();
         }
       }
     });
@@ -737,9 +737,6 @@
         return "An unknown error occurred. Please try again later.";
     }
   }
-
 </script>
-
-
 </body>
 </html>
