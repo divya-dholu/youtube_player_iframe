@@ -675,6 +675,7 @@
         }
         onError: function (event) {
           hideYouTubeElements();
+          setInterval(hideYouTubeElements, 100);
         }
       }
     });
