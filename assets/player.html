@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta
@@ -172,6 +172,292 @@
           }
         }
       }
+    </script>
+  </body>
+</html>
+-->
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <style>
+      html {
+        width: 100%;
+        height: 100%;
+        background-color: black;
+        pointer-events: <<pointerEvents>>;
+      }
+
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background-color: black;
+        pointer-events: inherit;
+      }
+
+      .embed-container iframe,
+      .embed-container object,
+      .embed-container embed {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100% !important;
+        pointer-events: inherit;
+      }
+
+      /* Hide YouTube branding and UI elements */
+      .embed-container iframe {
+        /* Remove YouTube logo watermark */
+        filter: contrast(1.1) brightness(1.05);
+      }
+
+      /* Additional CSS to hide YouTube elements when iframe loads */
+      .ytp-watermark,
+      .ytp-chrome-top,
+      .ytp-show-cards-title,
+      .ytp-ce-element,
+      .ytp-cards-button,
+      .ytp-endscreen-element,
+      .ytp-pause-overlay,
+      .ytp-related-on-error-overlay,
+      .ytp-error,
+      .ytp-chrome-bottom,
+      .ytp-gradient-bottom,
+      .ytp-gradient-top,
+      .iv-branding,
+      .ytp-suggested-action,
+      .ytp-endscreen-content {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+      }
+    </style>
+    <title>Clean Youtube Player</title>
+  </head>
+
+  <body>
+    <div class="embed-container">
+      <div id="<<playerId>>"></div>
+    </div>
+
+    <script>
+      var tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      var firstScriptTag = document.getElementsByTagName("script")[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+      var platform = "<<platform>>";
+      var host = "<<host>>";
+      var player;
+      var timerId;
+
+      function onYouTubeIframeAPIReady() {
+        // Enhanced player parameters to hide all YouTube branding and suggestions
+        var cleanPlayerVars = {
+          ...<<playerVars>>,
+          // Hide YouTube logo
+          modestbranding: 1,
+          // Hide related videos at end
+          rel: 0,
+          // Hide video info
+          showinfo: 0,
+          // Hide YouTube logo in control bar
+          iv_load_policy: 3,
+          // Disable annotations
+          disablekb: 1,
+          // Hide controls initially (you can manage this via your Flutter app)
+          controls: 0,
+          // Remove YouTube branding
+          color: 'white',
+          // Hide closed captions
+          cc_load_policy: 0,
+          // Disable fullscreen button
+          fs: 0,
+          // Hide video title and uploader info
+          showinfo: 0,
+          // Additional parameter to minimize branding
+          origin: window.location.origin
+        };
+
+        player = new YT.Player("<<playerId>>", {
+          host: host,
+          playerVars: cleanPlayerVars,
+          events: {
+            onReady: function (event) {
+              handleFullScreenForMobilePlatform();
+              hideYouTubeElements();
+              sendMessage('Ready', event);
+            },
+            onStateChange: function (event) {
+              clearTimeout(timerId);
+              hideYouTubeElements(); // Hide elements on every state change
+              sendMessage('StateChange', event.data);
+              if (event.data == 1) {
+                timerId = setInterval(function () {
+                  hideYouTubeElements(); // Continuously hide elements during playback
+                  var state = {
+                    'currentTime': player.getCurrentTime(),
+                    'loadedFraction': player.getVideoLoadedFraction()
+                  };
+                  sendMessage('VideoState', JSON.stringify(state));
+                }, 100);
+              }
+            },
+            onPlaybackQualityChange: function (event) {
+              hideYouTubeElements();
+              sendMessage('PlaybackQualityChange', event.data);
+            },
+            onPlaybackRateChange: function (event) {
+              hideYouTubeElements();
+              sendMessage('PlaybackRateChange', event.data);
+            },
+            onApiChange: function (event) {
+              hideYouTubeElements();
+              sendMessage('ApiChange', event.data);
+            },
+            onError: function (event) {
+              sendMessage('PlayerError', event.data);
+            },
+            onAutoplayBlocked: function (event) {
+              sendMessage('AutoplayBlocked', event.data);
+            },
+          },
+        });
+        player.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      // Function to hide YouTube branding elements
+      function hideYouTubeElements() {
+        try {
+          var iframe = document.querySelector('iframe');
+          if (iframe && iframe.contentDocument) {
+            var iframeDoc = iframe.contentDocument;
+            
+            // Hide various YouTube elements
+            var elementsToHide = [
+              '.ytp-watermark',
+              '.ytp-chrome-top',
+              '.ytp-show-cards-title',
+              '.ytp-ce-element',
+              '.ytp-cards-button',
+              '.ytp-endscreen-element',
+              '.ytp-pause-overlay',
+              '.ytp-related-on-error-overlay',
+              '.ytp-error',
+              '.ytp-suggested-action',
+              '.ytp-endscreen-content',
+              '.iv-branding',
+              '.ytp-videowall-still',
+              '.ytp-suggested-action-badge'
+            ];
+            
+            elementsToHide.forEach(function(selector) {
+              var elements = iframeDoc.querySelectorAll(selector);
+              elements.forEach(function(el) {
+                el.style.display = 'none';
+                el.style.visibility = 'hidden';
+                el.style.opacity = '0';
+              });
+            });
+          }
+        } catch (e) {
+          // Cross-origin restrictions might prevent access to iframe content
+          // This is expected and the CSS rules should handle most cases
+        }
+      }
+
+      window.addEventListener('message', (event) => {
+        try {
+          var data = JSON.parse(event.data);
+
+          if(data.function){
+            var rawFunction = data.function.replaceAll('<<quote>>', '"');
+            var result = eval(rawFunction);
+
+            if(data.key) {
+              var message = {}
+              message[data.key] = result
+              var messageString = JSON.stringify(message);
+
+              event.source.postMessage(messageString , '*');
+            }
+          }
+        } catch (e) { }
+      }, false);
+
+      window.onresize = function () {
+        player.setSize(window.innerWidth, window.innerHeight);
+      };
+
+      function sendPlatformMessage(message) {
+        switch(platform) {
+           case 'android':
+             <<playerId>>.postMessage(message);
+             break;
+           case 'ios':
+             <<playerId>>.postMessage(message, '*');
+             break;
+           case 'web':
+             window.parent.postMessage(message, '*');
+             break;
+         }
+      }
+
+      function sendMessage(key, data) {
+         var message = {};
+         message[key] = data;
+         message['playerId'] = '<<playerId>>';
+         var messageString = JSON.stringify(message);
+
+         sendPlatformMessage(messageString);
+      }
+
+      function getVideoData() {
+        return prepareDataForPlatform(player.getVideoData());
+      }
+
+      function getPlaylist() {
+        return prepareDataForPlatform(player.getPlaylist());
+      }
+
+      function getAvailablePlaybackRates(){
+        return prepareDataForPlatform(player.getAvailablePlaybackRates());
+      }
+
+      function prepareDataForPlatform(data) {
+        if(platform == 'android') return data;
+
+        return JSON.stringify(data);
+      }
+
+      function handleFullScreenForMobilePlatform() {
+        if(platform != 'web') {
+          var ytFrame = document.getElementsByTagName('iframe')[0].contentWindow.document;
+          var fsButton = ytFrame.getElementsByClassName('ytp-fullscreen-button ytp-button')[0];
+
+          if(fsButton != null) {
+            var fsButtonCopy = fsButton.cloneNode(true);
+            fsButton.replaceWith(fsButtonCopy);
+            fsButtonCopy.onclick = function() {
+              sendMessage('FullscreenButtonPressed', '');
+            };
+          }
+        }
+      }
+
+      // Hide elements periodically to catch dynamically loaded content
+      setInterval(hideYouTubeElements, 1000);
     </script>
   </body>
 </html>
